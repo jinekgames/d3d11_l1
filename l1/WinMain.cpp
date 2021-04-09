@@ -8,10 +8,13 @@
 #pragma warning (disable : 4996 )
 
 #include "MainConsts.h"
+
+#include <Mmsystem.h>
 #include <string>
 #include <cctype>
 
 #include "Window.h"
+#include "resource.h"
 
 
 
@@ -31,7 +34,6 @@ int CALLBACK WinMain(
 	HINSTANCE hPrevInstance,
 	LPSTR     lpCmdLine,
 	int       nCmdShow) {
-
 
 	try {
 
@@ -59,13 +61,13 @@ int CALLBACK WinMain(
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 
-			while ((GetTickCount64() - startTick) < 10);
+			while ((GetTickCount64() - startTick) < 50);
 
 		}
 
 
 		if (gResult == -1) {
-			return -1;
+			throw CHWND_LAST_EXCEPT();
 		}
 
 		return msg.wParam;
@@ -74,12 +76,10 @@ int CALLBACK WinMain(
 	catch (const myException& e) {
 		MessageBoxA(nullptr, e.what(), e.GetType(), MB_OK | MB_ICONEXCLAMATION);
 	}
-	catch (const std::exception& e)
-	{
+	catch (const std::exception& e) {
 		MessageBoxA(nullptr, e.what(), "Standard Exception", MB_OK | MB_ICONEXCLAMATION);
 	}
-	catch (...)
-	{
+	catch (...) {
 		MessageBoxA(nullptr, "No details available", "Unknown Exception", MB_OK | MB_ICONEXCLAMATION);
 	}
 	return -1;

@@ -6,6 +6,8 @@
 ////////////////////////////////////////
 
 #include "Window.h"
+
+#include <Mmsystem.h>
 #include <string>
 #include <sstream>
 #include "resource.h"
@@ -16,8 +18,8 @@ Window::WindowClass Window::WindowClass::wndClass;
 
 Window::WindowClass::WindowClass() noexcept
 	:
-	hinstance(GetModuleHandle(nullptr))
-{
+	hinstance(GetModuleHandle(nullptr)) {
+
 	WNDCLASSEX wc = { 0 };
 	wc.cbSize = sizeof(wc);
 	wc.style = CS_OWNDC;
@@ -34,33 +36,28 @@ Window::WindowClass::WindowClass() noexcept
 	RegisterClassEx(&wc);
 }
 
-Window::WindowClass::~WindowClass()
-{
+Window::WindowClass::~WindowClass() {
 	UnregisterClass(wndClassName, GetInstance());
 }
 
-LPCWSTR Window::WindowClass::GetName() noexcept
-{
+LPCWSTR Window::WindowClass::GetName() noexcept {
 	return wndClassName;
 }
 
-HINSTANCE Window::WindowClass::GetInstance() noexcept
-{
+HINSTANCE Window::WindowClass::GetInstance() noexcept {
 	return wndClass.hinstance;
 }
 
 
 // Window Stuff
-Window::Window(int width, int height, LPCWSTR name)
-{
+Window::Window(int width, int height, LPCWSTR name) {
 	// calculate window size based on desired client region size
 	RECT wr;
 	wr.left = 100;
 	wr.right = width + wr.left;
 	wr.top = 100;
 	wr.bottom = height + wr.top;
-	if (FAILED(AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE)))
-	{
+	if (FAILED(AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE))) {
 		throw CHWND_LAST_EXCEPT();
 	};
 
@@ -74,8 +71,7 @@ Window::Window(int width, int height, LPCWSTR name)
 	);
 
 	// check for error
-	if (hwnd == nullptr)
-	{
+	if (hwnd == nullptr) {
 		throw CHWND_LAST_EXCEPT();
 	}
 
@@ -84,119 +80,115 @@ Window::Window(int width, int height, LPCWSTR name)
 	ShowWindow(hwnd, SW_SHOWDEFAULT);
 }
 
-Window::~Window()
-{
+Window::~Window() {
 	DestroyWindow(hwnd);
 }
 
-LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
-{
+LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 	// use create parameter passed in from CreateWindow() to store window class pointer at WinAPI side
-	if (msg == WM_NCCREATE)
-	{
+	if (msg == WM_NCCREATE) {
 		// extract ptr to window class from creation data
 		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
 		Window* const pwnd = static_cast<Window*>(pCreate->lpCreateParams);
-		// set WinAPI-managed user data to store ptr to window class
+		// set WinAPI-managed user data to store ptr to window instance
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pwnd));
 		// set message proc to normal (non-setup) handler now that setup is finished
 		SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Window::HandleMsgThunk));
-		// forward message to window class handler
+		// forward message to window instance handler
 		return pwnd->HandleMsg(hWnd, msg, wParam, lParam);
 	}
 	// if we get a message before the WM_NCCREATE message, handle with default handler
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-LRESULT CALLBACK Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
-{
-	// retrieve ptr to window class
+LRESULT CALLBACK Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
+	// retrieve ptr to window instance
 	Window* const pWnd = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-	// forward message to window class handler
+	// forward message to window instance handler
 	return pWnd->HandleMsg(hWnd, msg, wParam, lParam);
 }
 
-LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) noexcept
-{
-	switch (msg)
-	{
-	case WM_CREATE:	// Initialisation
-	{
-		return 0;
-	} break;
-	case WM_MOVE:
-	{
-		//windowCoords.x = LOWORD(lparam);
-		//windowCoords.y = HIWORD(lparam);
-		return 0;
-	} break;
-	case WM_SIZE:
-	{
-		//windowCurSizeX = LOWORD(lparam);
-		//windowCurSizeY = HIWORD(lparam);
-		return 0;
-	} break;
-	case WM_MOUSEMOVE:
-	{
-		//cursorCoords.x = LOWORD(lparam);
-		//cursorCoords.y = HIWORD(lparam);
-		return 0;
-	} break;
-	case WM_CHAR:
-	{
-		static std::string windowName;
-		windowName += wparam;
-		SetWindowTextA(hwnd, windowName.c_str());
-	} break;
-	case WM_KEYDOWN:
-	{
-
-		// Debugging
-		static char but[5];
-		but[0] = wparam;
-		std::string debugStr = but;
-		debugStr += "\n";
-		OutputDebugStringA(debugStr.c_str());
-		////////////
-
-		switch (wparam)
+LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) noexcept {
+	switch (msg) {
+		case WM_CREATE:		// Initialisation
 		{
-		case VK_ESCAPE:
+			return 0;
+		} break;
+		case WM_MOVE:
 		{
-			OutputDebugStringA("esc\n");
-			return PostMessage(hwnd, WM_CLOSE, 0, 0);
+			//windowCoords.x = LOWORD(lparam);
+			//windowCoords.y = HIWORD(lparam);
+			return 0;
+		} break;
+		case WM_SIZE:
+		{
+			//windowCurSizeX = LOWORD(lparam);
+			//windowCurSizeY = HIWORD(lparam);
+			return 0;
+		} break;
+		case WM_MOUSEMOVE:
+		{
+			//cursorCoords.x = LOWORD(lparam);
+			//cursorCoords.y = HIWORD(lparam);
+			return 0;
+		} break;
+		case WM_KILLFOCUS:
+		{
+			keyboard.ClearState();
 		} break;
 
-		}
-	} break;
-	case WM_PAINT:	//Обновление
-	{
-		drawCallNum++;
+		// ----- Keyboard handling ----- //
+		case WM_CHAR:
+		{
+			keyboard.OnChar(static_cast<unsigned char>(wparam));
+		} break;
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:	//	(.Y.)
+		{
+			// filter of sleeping keys
+			if ( !(lparam & 0x40000000) || keyboard.AutorepeatIsEnabled() ) {
+				keyboard.OnKeyPressed(static_cast<unsigned char>(wparam));
+			}
+		} break;
+		case WM_KEYUP:
+		case WM_SYSKEYUP:
+		{
+			keyboard.OnKeyReleased(static_cast<unsigned char>(wparam));
+		} break;
+		// -END- Keyboard handling ----- //
 
-		//Объявление всего окна недействительным
-		//InvalidateRect(hwnd, NULL, TRUE);
+		case WM_PAINT:		// Window redrawing
+		{
+			drawCallNum++;
 
-		//перерисовка окна
-		//hdc = BeginPaint(hwnd, &ps);
-		//
-		//EndPaint(hwnd, &ps);
+			//Объявление всего окна недействительным
+			InvalidateRect(hwnd, NULL, TRUE);
 
-		return 0;
-	} break;
-	case WM_DESTROY:	//Закрытие
-	{
-		PostQuitMessage(300);
-		return 0;
-	} break;
-	case WM_CLOSE:
-	{
-		return SendMessage(hwnd, WM_DESTROY, 0, 0);
-	} break;
-	default:
-		break;
+			//перерисовка окна
+			//hdc = BeginPaint(hwnd, &ps);
+			//
+			//EndPaint(hwnd, &ps);
+
+			return 0;
+		} break;
+		case WM_DESTROY:	// Closing
+		{
+			PostQuitMessage(300);
+			return 0;
+		} break;
+		case WM_CLOSE:
+		{
+			return SendMessage(hwnd, WM_DESTROY, 0, 0);
+		} break;
+		default:
+			break;
 	}
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
+void Window::GameProc() {
+
 }
 
 
@@ -208,8 +200,7 @@ Window::wndException::wndException(int line, const char* file, HRESULT hr) noexc
 	hr(hr)
 {}
 
-const char* Window::wndException::what() const noexcept
-{
+const char* Window::wndException::what() const noexcept {
 	std::ostringstream oss;
 	oss << GetType() << std::endl
 		<< "[Error Code] " << GetErrorCode() << std::endl
@@ -219,13 +210,11 @@ const char* Window::wndException::what() const noexcept
 	return whatBuffer.c_str();
 }
 
-const char* Window::wndException::GetType() const noexcept
-{
+const char* Window::wndException::GetType() const noexcept {
 	return "jnk_gms wnd Exception";
 }
 
-std::string Window::wndException::TranslateErrorCode(HRESULT hr) noexcept
-{
+std::string Window::wndException::TranslateErrorCode(HRESULT hr) noexcept {
 	char* pMsgBuf = nullptr;
 
 	// windows will allocate memory for err string and make our pointer point to it
@@ -237,8 +226,7 @@ std::string Window::wndException::TranslateErrorCode(HRESULT hr) noexcept
 	);
 
 	// 0 string length returned indicates a failure
-	if (nMsgLen == 0)
-	{
+	if (nMsgLen == 0) {
 		return "Unidentified error code";
 	}
 	// copy error string from windows-allocated buffer to std::string
@@ -248,12 +236,10 @@ std::string Window::wndException::TranslateErrorCode(HRESULT hr) noexcept
 	return errorString;
 }
 
-HRESULT Window::wndException::GetErrorCode() const noexcept
-{
+HRESULT Window::wndException::GetErrorCode() const noexcept {
 	return hr;
 }
 
-std::string Window::wndException::GetErrorString() const noexcept
-{
+std::string Window::wndException::GetErrorString() const noexcept {
 	return TranslateErrorCode(hr);
 }

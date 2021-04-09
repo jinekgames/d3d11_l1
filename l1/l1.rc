@@ -60,7 +60,15 @@ IDI_ICON0               ICON                    "resources\\icon0.ico"
 // Cursor
 //
 
-IDI_CUR0             CURSOR                  "resources\\cur0.ani"
+IDI_CUR0                CURSOR                  "resources\\cur0.ani"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Music
+//
+
+IDI_MUS_CUM             WAVE                   "resources\\sounds\\CUM.wav"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////

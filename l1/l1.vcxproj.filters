@@ -24,6 +24,9 @@
     <ClCompile Include="Exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainConsts.h">
@@ -38,7 +41,7 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource1.h">
+    <ClInclude Include="Keyboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,5 +59,10 @@
     <None Include="resources\cur0.ani">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="resources\sounds\CUM.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

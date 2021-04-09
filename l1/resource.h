@@ -1,9 +1,12 @@
+#pragma once
+
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by l1.rc
 //
 #define IDI_ICON0                       101
 #define IDI_CUR0						201
+#define IDI_MUS_CUM						1001
 
 // Next default values for new objects
 // 

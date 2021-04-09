@@ -9,6 +9,7 @@
 
 #include "MainConsts.h"
 #include "Exception.h"
+#include "Keyboard.h"
 
 
 
@@ -56,6 +57,10 @@ private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	static LRESULT CALLBACK HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	LRESULT HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+
+public:
+	Keyboard keyboard;
+	void GameProc();
 
 private:
 	int width;
