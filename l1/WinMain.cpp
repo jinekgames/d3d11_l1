@@ -32,38 +32,56 @@ int CALLBACK WinMain(
 	LPSTR     lpCmdLine,
 	int       nCmdShow) {
 
-	// Register window class
-	Window wnd(400, 400, L"sosi");
+
+	try {
+
+		// Register window class
+		Window wnd(400, 400, L"sosi");
 
 
-	// Message pump
+		// Message pump
 
-	// message variable
-	MSG msg;
-	// exit code
-	BOOL gResult;
-	// start loop time
-	unsigned long startTick;
-	// end loop time
-	unsigned long endTick;
+		// message variable
+		MSG msg;
+		// exit code
+		BOOL gResult;
+		// start loop time
+		unsigned long startTick;
+		// end loop time
+		unsigned long endTick;
 
 
 
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0) {
+		while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0) {
 
-		startTick = GetTickCount64();
+			startTick = GetTickCount64();
 
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 
-		while ((GetTickCount64() - startTick) < 10);
+			while ((GetTickCount64() - startTick) < 10);
+
+		}
+
+
+		if (gResult == -1) {
+			return -1;
+		}
+
+		return msg.wParam;
 
 	}
-
-
-	if (gResult == -1) {
-		return -1;
+	catch (const myException& e) {
+		MessageBoxA(nullptr, e.what(), e.GetType(), MB_OK | MB_ICONEXCLAMATION);
 	}
+	catch (const std::exception& e)
+	{
+		MessageBoxA(nullptr, e.what(), "Standard Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	catch (...)
+	{
+		MessageBoxA(nullptr, "No details available", "Unknown Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	return -1;
 
-	return msg.wParam;
 }

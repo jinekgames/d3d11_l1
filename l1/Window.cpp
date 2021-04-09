@@ -7,6 +7,8 @@
 
 #include "Window.h"
 #include <string>
+#include <sstream>
+#include "resource.h"
 
 
 // Window Class Stuff
@@ -23,12 +25,12 @@ Window::WindowClass::WindowClass() noexcept
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = GetInstance();
-	wc.hIcon = nullptr;
-	wc.hCursor = nullptr;
+	wc.hIcon = static_cast<HICON>(LoadImage(hinstance, MAKEINTRESOURCE(IDI_ICON0), IMAGE_ICON, 64,64,0));
+	wc.hCursor = static_cast<HCURSOR>(LoadImage(hinstance, MAKEINTRESOURCE(IDI_CUR0), IMAGE_CURSOR, 32, 32, 0));;
 	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = GetName();
-	wc.hIconSm = nullptr;
+	wc.hIconSm = static_cast<HICON>(LoadImage(hinstance, MAKEINTRESOURCE(IDI_ICON0), IMAGE_ICON, 16, 16, 0));;
 	RegisterClassEx(&wc);
 }
 
@@ -49,7 +51,7 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
 
 
 // Window Stuff
-Window::Window(int width, int height, LPCWSTR name) noexcept
+Window::Window(int width, int height, LPCWSTR name)
 {
 	// calculate window size based on desired client region size
 	RECT wr;
@@ -57,7 +59,12 @@ Window::Window(int width, int height, LPCWSTR name) noexcept
 	wr.right = width + wr.left;
 	wr.top = 100;
 	wr.bottom = height + wr.top;
-	AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
+	if (FAILED(AdjustWindowRect(&wr, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE)))
+	{
+		throw CHWND_LAST_EXCEPT();
+	};
+
+
 	// create window & get hwnd
 	hwnd = CreateWindow(
 		WindowClass::GetName(), name,
@@ -65,6 +72,14 @@ Window::Window(int width, int height, LPCWSTR name) noexcept
 		CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top,
 		nullptr, nullptr, WindowClass::GetInstance(), this
 	);
+
+	// check for error
+	if (hwnd == nullptr)
+	{
+		throw CHWND_LAST_EXCEPT();
+	}
+
+
 	// show window
 	ShowWindow(hwnd, SW_SHOWDEFAULT);
 }
@@ -74,7 +89,7 @@ Window::~Window()
 	DestroyWindow(hwnd);
 }
 
-LRESULT WINAPI Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	// use create parameter passed in from CreateWindow() to store window class pointer at WinAPI side
 	if (msg == WM_NCCREATE)
@@ -93,7 +108,7 @@ LRESULT WINAPI Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-LRESULT WINAPI Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
+LRESULT CALLBACK Window::HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	// retrieve ptr to window class
 	Window* const pWnd = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
@@ -182,4 +197,63 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) noe
 	}
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
+
+
+// Window Exception Stuff
+Window::wndException::wndException(int line, const char* file, HRESULT hr) noexcept
+	:
+	myException(line, file),
+	hr(hr)
+{}
+
+const char* Window::wndException::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "[Error Code] " << GetErrorCode() << std::endl
+		<< "[Description] " << GetErrorString() << std::endl
+		<< GetOriginString();
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+const char* Window::wndException::GetType() const noexcept
+{
+	return "jnk_gms wnd Exception";
+}
+
+std::string Window::wndException::TranslateErrorCode(HRESULT hr) noexcept
+{
+	char* pMsgBuf = nullptr;
+
+	// windows will allocate memory for err string and make our pointer point to it
+	DWORD nMsgLen = FormatMessageA(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		reinterpret_cast<LPSTR>(&pMsgBuf), 0, nullptr
+	);
+
+	// 0 string length returned indicates a failure
+	if (nMsgLen == 0)
+	{
+		return "Unidentified error code";
+	}
+	// copy error string from windows-allocated buffer to std::string
+	std::string errorString = pMsgBuf;
+	// free windows buffer
+	LocalFree(pMsgBuf);
+	return errorString;
+}
+
+HRESULT Window::wndException::GetErrorCode() const noexcept
+{
+	return hr;
+}
+
+std::string Window::wndException::GetErrorString() const noexcept
+{
+	return TranslateErrorCode(hr);
 }
