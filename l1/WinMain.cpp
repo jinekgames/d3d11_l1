@@ -61,6 +61,8 @@ int CALLBACK WinMain(
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 
+			wnd.GameProc();
+
 			while ((GetTickCount64() - startTick) < 50);
 
 		}
