@@ -1,7 +1,7 @@
 // 
 // App.h
 // 
-// App class description
+// App class declaration
 // 
 ////////////////////////////////////////
 
@@ -25,5 +25,6 @@ private:
 private:
 	Window wnd;
 	FpsTimer timer;
+	FpsTimer colorTimer;
 
 };

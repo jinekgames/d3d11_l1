@@ -152,22 +152,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="dxerr\ddxerr.cpp" />
+    <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="FpsTimer.cpp" />
+    <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="WinMain.cpp" />
+    <ClCompile Include="WindowsMessageMap.cpp" />
+    <ClCompile Include="WinMain1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="dxerr\ddxerr.h" />
+    <ClInclude Include="DxgiInfoManager.h" />
     <ClInclude Include="Exception.h" />
+    <ClInclude Include="Graphics.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="MainConsts.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="FpsTimer.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowSettings.h" />
+    <ClInclude Include="WindowsMessageMap.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="l1.rc" />
@@ -176,10 +185,14 @@
     <Image Include="resources\icon0.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dxerr\DXGetErrorDescription.inl" />
+    <None Include="dxerr\DXGetErrorString.inl" />
+    <None Include="dxerr\DXTrace.inl" />
     <None Include="resources\cur0.ani" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="resources\sounds\CUM.wav" />
+    <Media Include="resources\sounds\WARNING.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

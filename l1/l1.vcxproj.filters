@@ -13,17 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\ddxerr">
+      <UniqueIdentifier>{f915d2c1-9bee-4158-95bf-63f59f4bfd1d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Exception.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Keyboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -36,15 +30,30 @@
     <ClCompile Include="FpsTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WindowsMessageMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dxerr\ddxerr.cpp">
+      <Filter>Header Files\ddxerr</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DxgiInfoManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainConsts.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Exception.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -62,6 +71,27 @@
     <ClInclude Include="FpsTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WindowsMessageMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dxerr\ddxerr.h">
+      <Filter>Header Files\ddxerr</Filter>
+    </ClInclude>
+    <ClInclude Include="Exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DxgiInfoManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="l1.rc">
@@ -77,9 +107,21 @@
     <None Include="resources\cur0.ani">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="dxerr\DXGetErrorDescription.inl">
+      <Filter>Header Files\ddxerr</Filter>
+    </None>
+    <None Include="dxerr\DXGetErrorString.inl">
+      <Filter>Header Files\ddxerr</Filter>
+    </None>
+    <None Include="dxerr\DXTrace.inl">
+      <Filter>Header Files\ddxerr</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Media Include="resources\sounds\CUM.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="resources\sounds\WARNING.wav">
       <Filter>Resource Files</Filter>
     </Media>
   </ItemGroup>

@@ -1,7 +1,7 @@
 // 
 // FpsTimer.h
 // 
-// FpsTimer class description
+// FpsTimer class declaration
 // 
 ////////////////////////////////////////
 
@@ -14,9 +14,9 @@
 class FpsTimer {
 
 public:
-	FpsTimer();
-	float Mark();
-	float Peek() const;
+	FpsTimer() noexcept;
+	float Mark() noexcept;
+	float Peek() const noexcept;
 
 private:
 	std::chrono::steady_clock::time_point last;

@@ -1,7 +1,7 @@
 // 
 // MainConsts.h
 // 
-// main headers and name constans deginision
+// main headers and name constans definision
 // 
 ////////////////////////////////////////
 

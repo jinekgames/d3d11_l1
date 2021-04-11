@@ -1,7 +1,7 @@
 ﻿// 
 // Window.cpp
 // 
-// a window class definision
+// a window class definition
 // 
 ////////////////////////////////////////
 
@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include "resource.h"
+
 
 
 // Window Class Stuff
@@ -81,6 +82,8 @@ Window::Window(int width, int height, LPCWSTR name)
 
 	// show window
 	ShowWindow(hwnd, SW_SHOWDEFAULT);
+	// create graphics object
+	pGraph = std::make_unique<Graphics>(hwnd);
 }
 
 Window::~Window() {
@@ -93,7 +96,7 @@ void Window::SetTitle(const std::string& title) {
 	}
 }
 
-std::optional<int> Window::ProcessMessages() {
+std::optional<int> Window::ProcessMessages() noexcept {
 
 	// message variable
 	MSG msg;
@@ -104,7 +107,7 @@ std::optional<int> Window::ProcessMessages() {
 		// check for quit because peekmessage does not signal this via return val
 		if (msg.message == WM_QUIT) {
 			// return optional wrapping int (arg to PostQuitMessage is in wparam) signals quit
-			return msg.wParam;
+			return (int)msg.wParam;
 		}
 
 		// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
@@ -116,6 +119,14 @@ std::optional<int> Window::ProcessMessages() {
 	// return empty optional when not quitting app
 	return {};
 	
+}
+
+Graphics& Window::Graph() {
+	if (!pGraph)
+	{
+		throw CHWND_NOGFX_EXCEPT();
+	}
+	return *pGraph;
 }
 
 LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
@@ -293,31 +304,12 @@ void Window::GameProc() {
 
 
 // Window Exception Stuff
-Window::wndException::wndException(int line, const char* file, HRESULT hr) noexcept
-	:
-	myException(line, file),
-	hr(hr)
-{}
 
-const char* Window::wndException::what() const noexcept {
-	std::ostringstream oss;
-	oss << GetType() << std::endl
-		<< "[Error Code] " << GetErrorCode() << std::endl
-		<< "[Description] " << GetErrorString() << std::endl
-		<< GetOriginString();
-	whatBuffer = oss.str();
-	return whatBuffer.c_str();
-}
-
-const char* Window::wndException::GetType() const noexcept {
-	return "jnk_gms wnd Exception";
-}
-
-std::string Window::wndException::TranslateErrorCode(HRESULT hr) noexcept {
+std::string Window::Exception::TranslateErrorCode(HRESULT hr) noexcept {
 	char* pMsgBuf = nullptr;
 
 	// windows will allocate memory for err string and make our pointer point to it
-	DWORD nMsgLen = FormatMessageA(
+	const DWORD nMsgLen = FormatMessageA(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		nullptr, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -335,10 +327,39 @@ std::string Window::wndException::TranslateErrorCode(HRESULT hr) noexcept {
 	return errorString;
 }
 
-HRESULT Window::wndException::GetErrorCode() const noexcept {
+Window::HrException::HrException(int line, const char* file, HRESULT hr) noexcept
+	:
+	Exception(line, file),
+	hr(hr)
+{}
+
+const char* Window::HrException::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "[Error Code] 0x" << std::hex << std::uppercase << GetErrorCode()
+		<< std::dec << " (" << (unsigned long)GetErrorCode() << ")" << std::endl
+		<< "[Description] " << GetErrorDescription() << std::endl
+		<< GetOriginString();
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+const char* Window::HrException::GetType() const noexcept
+{
+	return "Chili Window Exception";
+}
+
+HRESULT Window::HrException::GetErrorCode() const noexcept {
 	return hr;
 }
 
-std::string Window::wndException::GetErrorString() const noexcept {
-	return TranslateErrorCode(hr);
+std::string Window::HrException::GetErrorDescription() const noexcept {
+	return Exception::TranslateErrorCode(hr);
+}
+
+
+const char* Window::NoGfxException::GetType() const noexcept
+{
+	return "Window Exception [No Graphics]";
 }

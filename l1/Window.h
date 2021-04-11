@@ -1,7 +1,7 @@
 // 
 // Window.h
 // 
-// a window class description
+// a window class declaration
 // 
 ////////////////////////////////////////
 
@@ -11,25 +11,40 @@
 #include "Exception.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Graphics.h"
 #include <optional>
+#include <memory>
+
+#include "WindowSettings.h"
 
 
 
 class Window {
 
 public:
-	class wndException : public myException
+	class Exception : public myException
+	{
+		using myException::myException;
+	public:
+		static std::string TranslateErrorCode(HRESULT hr) noexcept;
+	};
+	class HrException : public Exception
 	{
 	public:
-		wndException(int line, const char* file, HRESULT hr) noexcept;
+		HrException(int line, const char* file, HRESULT hr) noexcept;
 		const char* what() const noexcept override;
-		virtual const char* GetType() const noexcept;
-		static std::string TranslateErrorCode(HRESULT hr) noexcept;
+		const char* GetType() const noexcept override;
 		HRESULT GetErrorCode() const noexcept;
-		std::string GetErrorString() const noexcept;
+		std::string GetErrorDescription() const noexcept;
 	private:
 		HRESULT hr;
-};
+	};
+	class NoGfxException : public Exception
+	{
+	public:
+		using Exception::Exception;
+		const char* GetType() const noexcept override;
+	};
 
 private:
 	// singleton manages registration/cleanup of window class
@@ -44,7 +59,7 @@ private:
 		WindowClass(const WindowClass&) = delete;
 		WindowClass& operator=(const WindowClass&) = delete;
 	private:
-		static constexpr LPCWSTR wndClassName = L"deep dark fantasy";
+		static constexpr LPCWSTR wndClassName = WND_CLASS_NAME;
 		static WindowClass wndClass;
 		HINSTANCE hinstance;
 	};
@@ -55,7 +70,8 @@ public:
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;
 	void SetTitle(const std::string& title);
-	static std::optional<int> ProcessMessages();
+	static std::optional<int> ProcessMessages() noexcept;
+	Graphics& Graph();
 
 private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -65,12 +81,15 @@ private:
 public:
 	Keyboard keyboard;
 	Mouse mouse;
+
+public:
 	void GameProc();
 
 private:
 	int width;
 	int height;
 	HWND hwnd;
+	std::unique_ptr<Graphics> pGraph;
 
 	// number of WM_DRAW calls
 	WORD drawCallNum = 0;
@@ -79,5 +98,6 @@ private:
 
 
 // error exception helper macro
-#define CHWND_EXCEPT( hr ) Window::wndException( __LINE__,__FILE__,hr )
-#define CHWND_LAST_EXCEPT() Window::wndException( __LINE__,__FILE__,GetLastError() )
+#define CHWND_EXCEPT( hr ) Window::HrException( __LINE__,__FILE__,(hr) )
+#define CHWND_LAST_EXCEPT() Window::HrException( __LINE__,__FILE__,GetLastError() )
+#define CHWND_NOGFX_EXCEPT() Window::NoGfxException( __LINE__,__FILE__ )

@@ -7,6 +7,7 @@
 #define IDI_ICON0                       101
 #define IDI_CUR0						201
 #define IDI_MUS_CUM						1001
+#define IDI_MUS_WARNING					1002
 
 // Next default values for new objects
 // 

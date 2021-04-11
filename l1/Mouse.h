@@ -1,7 +1,7 @@
 // 
 // Mouse.h
 // 
-// a mouse class description
+// a mouse class declaration
 // 
 ////////////////////////////////////////
 

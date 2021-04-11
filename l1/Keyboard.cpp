@@ -1,7 +1,7 @@
 // 
 // Keyboard.h
 // 
-// a keyboard class definision
+// a keyboard class definition
 // 
 ////////////////////////////////////////
 

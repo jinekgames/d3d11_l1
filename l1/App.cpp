@@ -1,7 +1,7 @@
 // 
 // App.cpp
 // 
-// App class definision
+// App class definition
 // 
 ////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 
 App::App()
 	:
-	wnd(400, 400, L"sosi")
+	wnd(WND_WIDTH, WND_HEIGTH, WND_NAME)
 {}
 
 int App::Go()
@@ -42,12 +42,20 @@ void App::DoFrame() {
 
 	// Game logic here
 	wnd.GameProc();
-	Sleep(16);
+
+	static int c = 1;
+	if ( (colorTimer.Peek() * 1000) > 200 ) {
+		colorTimer.Mark();
+		c = 1 - c;
+	}
+	wnd.Graph().ClearBackBuffer(1.0f * c, 0,0);
+	wnd.Graph().SwapBuffers();
 
 
-	const float t = timer.Peek();
+	// timer test (frame time view)
+	const float t = colorTimer.Peek();
 	std::ostringstream oss;
-	oss << "Time elapsed: " << std::setprecision(3) << std::fixed << t << "s";
+	oss << "Time elapsed: " /*<< std::setprecision(3) << std::fixed*/ << t*1000 << "s";
 	wnd.SetTitle(oss.str());
 
 }

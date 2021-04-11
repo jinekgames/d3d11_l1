@@ -1,7 +1,7 @@
 // 
 // FpsTimer.cpp
 // 
-// FpsTimer class definision
+// FpsTimer class definition
 // 
 ////////////////////////////////////////
 
@@ -12,17 +12,17 @@ using namespace std::chrono;
 
 
 
-FpsTimer::FpsTimer() {
+FpsTimer::FpsTimer() noexcept {
 	last = steady_clock::now();
 }
 
-float FpsTimer::Mark() {
+float FpsTimer::Mark() noexcept {
 	const auto old = last;
 	last = steady_clock::now();
 	const duration<float> frameTime = last - old;
 	return frameTime.count();
 }
 
-float FpsTimer::Peek() const {
+float FpsTimer::Peek() const noexcept {
 	return duration<float>(steady_clock::now() - last).count();
 }

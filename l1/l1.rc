@@ -69,6 +69,7 @@ IDI_CUR0                CURSOR                  "resources\\cur0.ani"
 //
 
 IDI_MUS_CUM             WAVE                   "resources\\sounds\\CUM.wav"
+IDI_MUS_WARNING         WAVE                   "resources\\sounds\\WARNING.wav"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
