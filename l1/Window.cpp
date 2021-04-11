@@ -93,6 +93,31 @@ void Window::SetTitle(const std::string& title) {
 	}
 }
 
+std::optional<int> Window::ProcessMessages() {
+
+	// message variable
+	MSG msg;
+
+	// while queue has messages, remove and dispatch them (but do not block on empty queue)
+	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+
+		// check for quit because peekmessage does not signal this via return val
+		if (msg.message == WM_QUIT) {
+			// return optional wrapping int (arg to PostQuitMessage is in wparam) signals quit
+			return msg.wParam;
+		}
+
+		// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+
+	}
+
+	// return empty optional when not quitting app
+	return {};
+	
+}
+
 LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept {
 	// use create parameter passed in from CreateWindow() to store window class pointer at WinAPI side
 	if (msg == WM_NCCREATE) {
@@ -229,20 +254,20 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) noe
 		} break;
 		// -END- Mouse handling ----- //
 
-		case WM_PAINT:		// Window redrawing
-		{
-			drawCallNum++;
+		//case WM_PAINT:		// Window redrawing
+		//{
+		//	drawCallNum++;
 
-			//Объявление всего окна недействительным
-			InvalidateRect(hwnd, NULL, TRUE);
+		//	//Объявление всего окна недействительным
+		//	InvalidateRect(hwnd, NULL, TRUE);
 
-			//перерисовка окна
-			//hdc = BeginPaint(hwnd, &ps);
-			//
-			//EndPaint(hwnd, &ps);
+		//	//перерисовка окна
+		//	//hdc = BeginPaint(hwnd, &ps);
+		//	//
+		//	//EndPaint(hwnd, &ps);
 
-			return 0;
-		} break;
+		//	return 0;
+		//} break;
 		case WM_DESTROY:	// Closing
 		{
 			PostQuitMessage(300);
@@ -261,48 +286,7 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) noe
 
 void Window::GameProc() {
 
-	// test code
-	/*while (!mouse.IsEmpty())
-	{
-		const auto e = mouse.Read();
-		switch (e.GetType())
-		{
-			case Mouse::Event::Type::Leave:
-				SetTitle("Gone!");
-			break;
-			case Mouse::Event::Type::Move: {
-				std::ostringstream oss;
-				oss << "Mouse moved to (" << e.GetPosX() << "," << e.GetPosY() << ")";
-				SetTitle(oss.str());
-			} break;
-		}
-	}*/
-
-	// test code
-	static int i = 0;
-	while (!mouse.IsEmpty())
-	{
-		const auto e = mouse.Read();
-		switch (e.GetType())
-		{
-		case Mouse::Event::Type::WheelUp:
-			i++;
-			{
-				std::ostringstream oss;
-				oss << "Up: " << i;
-				SetTitle(oss.str());
-			}
-			break;
-		case Mouse::Event::Type::WheelDown:
-			i--;
-			{
-				std::ostringstream oss;
-				oss << "Down: " << i;
-				SetTitle(oss.str());
-			}
-			break;
-		}
-	}
+	// sm game logic that need wnd private variables
 
 }
 
