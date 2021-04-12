@@ -16,6 +16,12 @@
     <Filter Include="Header Files\ddxerr">
       <UniqueIdentifier>{f915d2c1-9bee-4158-95bf-63f59f4bfd1d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\git files">
+      <UniqueIdentifier>{a9a0b5d8-0180-4c35-9f07-95c38aafdd55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{6ca5acf1-7324-4051-bb29-ca7741a6796c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Keyboard.cpp">
@@ -36,9 +42,6 @@
     <ClCompile Include="dxerr\ddxerr.cpp">
       <Filter>Header Files\ddxerr</Filter>
     </ClCompile>
-    <ClCompile Include="WinMain1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Exception.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -49,6 +52,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DxgiInfoManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,6 +122,12 @@
     <None Include="dxerr\DXTrace.inl">
       <Filter>Header Files\ddxerr</Filter>
     </None>
+    <None Include="..\.gitattributes">
+      <Filter>Resource Files\git files</Filter>
+    </None>
+    <None Include="..\.gitignore">
+      <Filter>Resource Files\git files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Media Include="resources\sounds\CUM.wav">
@@ -124,5 +136,13 @@
     <Media Include="resources\sounds\WARNING.wav">
       <Filter>Resource Files</Filter>
     </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\VertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\PixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

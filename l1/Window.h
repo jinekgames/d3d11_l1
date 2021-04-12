@@ -22,14 +22,12 @@
 class Window {
 
 public:
-	class Exception : public myException
-	{
+	class Exception : public myException {
 		using myException::myException;
 	public:
 		static std::string TranslateErrorCode(HRESULT hr) noexcept;
 	};
-	class HrException : public Exception
-	{
+	class HrException : public Exception {
 	public:
 		HrException(int line, const char* file, HRESULT hr) noexcept;
 		const char* what() const noexcept override;
@@ -39,8 +37,7 @@ public:
 	private:
 		HRESULT hr;
 	};
-	class NoGfxException : public Exception
-	{
+	class NoGfxException : public Exception {
 	public:
 		using Exception::Exception;
 		const char* GetType() const noexcept override;
@@ -48,8 +45,7 @@ public:
 
 private:
 	// singleton manages registration/cleanup of window class
-	class WindowClass
-	{
+	class WindowClass {
 	public:
 		static LPCWSTR GetName() noexcept;
 		static HINSTANCE GetInstance() noexcept;

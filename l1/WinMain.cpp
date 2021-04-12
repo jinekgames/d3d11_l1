@@ -17,30 +17,32 @@
 *	You should have received a copy of the GNU General Public License					  *
 *	along with The Chili Direct3D Engine.  If not, see <http://www.gnu.org/licenses/>.    *
 ******************************************************************************************/
+
 #include "App.h"
+
 
 
 int CALLBACK WinMain(
 	HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	LPSTR     lpCmdLine,
-	int       nCmdShow )
-{
-	try
-	{
+	int       nCmdShow ) {
+
+	srand(GetTickCount64());
+
+	try {
 		return App{}.Go();
 	}
-	catch( const myException& e )
-	{
+	catch( const myException& e ) {
 		MessageBoxA( nullptr,e.what(),e.GetType(),MB_OK | MB_ICONEXCLAMATION );
 	}
-	catch( const std::exception& e )
-	{
+	catch( const std::exception& e ) {
 		MessageBoxA( nullptr,e.what(),"Standard Exception",MB_OK | MB_ICONEXCLAMATION );
 	}
-	catch( ... )
-	{
+	catch( ... ) {
 		MessageBoxA( nullptr,"No details available","Unknown Exception",MB_OK | MB_ICONEXCLAMATION );
 	}
+
 	return -1;
+
 }

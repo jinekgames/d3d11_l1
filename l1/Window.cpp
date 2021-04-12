@@ -265,20 +265,6 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) noe
 		} break;
 		// -END- Mouse handling ----- //
 
-		//case WM_PAINT:		// Window redrawing
-		//{
-		//	drawCallNum++;
-
-		//	//Объявление всего окна недействительным
-		//	InvalidateRect(hwnd, NULL, TRUE);
-
-		//	//перерисовка окна
-		//	//hdc = BeginPaint(hwnd, &ps);
-		//	//
-		//	//EndPaint(hwnd, &ps);
-
-		//	return 0;
-		//} break;
 		case WM_DESTROY:	// Closing
 		{
 			PostQuitMessage(300);
