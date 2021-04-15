@@ -25,6 +25,5 @@ private:
 private:
 	Window wnd;
 	FpsTimer timer;
-	FpsTimer colorTimer;
 
 };

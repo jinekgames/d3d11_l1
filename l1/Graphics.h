@@ -72,11 +72,25 @@ public:
 		float x;
 		float y;
 	};
+	struct VertexColor
+	{
+		struct {
+			float x;
+			float y;
+		} coords;
+		struct {
+			unsigned char r;
+			unsigned char g;
+			unsigned char b;
+			unsigned char a;
+		} color;
+	};
 private:
 	bool isShaderLoded;
 public:
 	bool IsShaderLoded();
 	void SetShaders(LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
+	void SetShadersColor(LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
 	void ReleaseShaders(); // does absolutely nothing
 	
 
@@ -84,10 +98,15 @@ public:
 public:
 #define RANDOM_COORD	(float)(rand() % 100) / 50 - 1.0f
 #define VERTICES_DRAW_CALL_U(vertices, primitivesTopology)	wnd.Graph().DrawTriangleU(vertices, std::size(vertices), sizeof(vertices), primitivesTopology);
+#define VERTICES_DRAW_CALL_U_COLOR(vertices, primitivesTopology)	wnd.Graph().DrawTriangleUColor(vertices, std::size(vertices), sizeof(vertices), primitivesTopology);
 #define VERTICES_DRAW_CALL(vertices, primitivesTopology, pixelShaderPath, vertexShaderPath)	wnd.Graph().DrawTriangle(vertices, std::size(vertices), sizeof(vertices), primitivesTopology, pixelShaderPath, vertexShaderPath);
-	void DrawTestTriangle();
+#define VERTICES_DRAW_CALL_COLOR(vertices, primitivesTopology, pixelShaderPath, vertexShaderPath)	wnd.Graph().DrawTriangleColor(vertices, std::size(vertices), sizeof(vertices), primitivesTopology, pixelShaderPath, vertexShaderPath);
+	void DrawTestTriangle(float angle, float x, float y);
 	void DrawTriangleU(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology);
+	void DrawTriangleUColor(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology);
 	void DrawTriangle(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology, LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
+	void DrawTriangleColor(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology, LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
+
 
 
 private:
@@ -98,5 +117,6 @@ private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDSV;
 
 };

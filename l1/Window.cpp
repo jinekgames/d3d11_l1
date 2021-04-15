@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include "resource.h"
+#include "WindowsThrowMacros.h"
 
 
 
@@ -229,6 +230,8 @@ LRESULT Window::HandleMsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) noe
 		{
 			const POINTS pt = MAKEPOINTS(lparam);
 			mouse.OnLeftPressed(pt.x, pt.y);
+			// bring window to foreground on lclick client region
+			SetForegroundWindow(hwnd);
 		} break;
 		case WM_RBUTTONDOWN:
 		{
