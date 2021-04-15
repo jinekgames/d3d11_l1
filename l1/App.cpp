@@ -6,6 +6,8 @@
 ////////////////////////////////////////
 
 #include "App.h"
+#include "Box.h"
+#include <memory>
 
 #include <sstream>
 #include <iomanip>
@@ -14,8 +16,25 @@
 
 App::App()
 	:
-	wnd(WND_WIDTH, WND_HEIGTH, WND_NAME)
-{}
+	wnd(WND_WIDTH, WND_HEIGTH, WND_NAME) {
+
+	std::mt19937 rng(std::random_device{}());
+	std::uniform_real_distribution<float> adist(0.0f, 3.1415f * 2.0f);
+	std::uniform_real_distribution<float> ddist(0.0f, 3.1415f * 2.0f);
+	std::uniform_real_distribution<float> odist(0.0f, 3.1415f * 0.3f);
+	std::uniform_real_distribution<float> rdist(6.0f, 20.0f);
+	for (auto i = 0; i < 1; i++)
+	{
+		boxes.push_back(std::make_unique<Box>(
+			wnd.Graph(), rng, adist,
+			ddist, odist, rdist
+			));
+	}
+	wnd.Graph().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
+
+}
+
+App::~App() {}
 
 int App::Go()
 {
@@ -39,12 +58,20 @@ int App::Go()
 
 void App::DoFrame() {
 
-	//timer.Mark();
+	auto dt = timer.Mark();
 
 
 	// Game logic here
 	wnd.GameProc();
 
+
+	wnd.Graph().ClearBackBuffer(0.07f, 0.0f, 0.12f);
+	for (auto& b : boxes) {
+		b->Update(dt);
+		b->Draw(wnd.Graph());
+	}
+
+	/*
 	//static int c = 1;
 	//static FpsTimer colorTimer;
 	//if ((colorTimer.Peek() * 1000) > 200) {
@@ -56,22 +83,6 @@ void App::DoFrame() {
 	static FpsTimer colorTimerBck;
 	float cbck = abs(sin(colorTimerBck.Peek()));
 	wnd.Graph().ClearBackBuffer(0.8 + cbck / 8.0f, 0.1f + cbck / 2.0f, 0.4f + cbck / 3.0f);
-
-
-
-	wnd.Graph().DrawTestTriangle(
-		-timer.Peek(),
-		0.0f,
-		0.0f
-	);
-	wnd.Graph().DrawTestTriangle(
-		timer.Peek(),
-		wnd.mouse.GetPosX() / 400.0f - 1.0f,
-		-wnd.mouse.GetPosY() / 300.0f + 1.0f
-	);
-
-
-
 
 
 	/*
@@ -130,14 +141,13 @@ void App::DoFrame() {
 	VERTICES_DRAW_CALL_U_COLOR(heart3strip, D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	*/
 
-
 	wnd.Graph().SwapBuffers();
 
 
 	// timer test (frame time view)
 	const float t = timer.Peek();
 	std::ostringstream oss;
-	oss << "Time elapsed: " << std::setprecision(3) << std::fixed << t*1000 << "s";
-	//wnd.SetTitle(oss.str());
+	oss << "Time elapsed: " << std::setprecision(3) << std::fixed << t << "s";
+	wnd.SetTitle(oss.str());
 
 }

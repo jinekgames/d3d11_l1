@@ -15,12 +15,18 @@
 #include <wrl.h>
 #include <vector>
 #include "DxgiInfoManager.h"
+#include <d3dcompiler.h>
+#include <DirectXMath.h>
+#include <memory>
+#include <random>
 
 #define _CRT_SECURE_NO_WARNINGS
 
 
 
 class Graphics {
+
+	friend class Bindable;
 
 public:
 	class Exception : public myException {
@@ -64,8 +70,12 @@ public:
 	void ConfigureTargetAndViewport();
 	void SwapBuffers();
 	void ClearBackBuffer( float red, float green, float blue );
+	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
+	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
+	DirectX::XMMATRIX GetProjection() const noexcept;
 
 
+// jnk_gms code
 // for drawing triangles
 public:
 	struct Vertex {
@@ -92,24 +102,22 @@ public:
 	void SetShaders(LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
 	void SetShadersColor(LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
 	void ReleaseShaders(); // does absolutely nothing
-	
-
-
 public:
 #define RANDOM_COORD	(float)(rand() % 100) / 50 - 1.0f
 #define VERTICES_DRAW_CALL_U(vertices, primitivesTopology)	wnd.Graph().DrawTriangleU(vertices, std::size(vertices), sizeof(vertices), primitivesTopology);
 #define VERTICES_DRAW_CALL_U_COLOR(vertices, primitivesTopology)	wnd.Graph().DrawTriangleUColor(vertices, std::size(vertices), sizeof(vertices), primitivesTopology);
 #define VERTICES_DRAW_CALL(vertices, primitivesTopology, pixelShaderPath, vertexShaderPath)	wnd.Graph().DrawTriangle(vertices, std::size(vertices), sizeof(vertices), primitivesTopology, pixelShaderPath, vertexShaderPath);
 #define VERTICES_DRAW_CALL_COLOR(vertices, primitivesTopology, pixelShaderPath, vertexShaderPath)	wnd.Graph().DrawTriangleColor(vertices, std::size(vertices), sizeof(vertices), primitivesTopology, pixelShaderPath, vertexShaderPath);
-	void DrawTestTriangle(float angle, float x, float y);
 	void DrawTriangleU(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology);
 	void DrawTriangleUColor(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology);
 	void DrawTriangle(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology, LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
 	void DrawTriangleColor(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology, LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath);
+// --
 
 
 
 private:
+	DirectX::XMMATRIX projection;
 #ifndef NDEBUG
 	DxgiInfoManager infoManager;
 #endif
