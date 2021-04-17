@@ -61,7 +61,7 @@ private:
 	};
 
 public:
-	Window(int width, int height, LPCWSTR name);
+	Window(wndsets& WndSets);
 	~Window();
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;

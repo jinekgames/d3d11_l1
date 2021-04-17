@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Drawables">
       <UniqueIdentifier>{38268f96-2df3-407f-aa67-6bc64d1db7ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Primitives">
+      <UniqueIdentifier>{1dd67226-a439-479b-b899-dcd152fcf0ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Primitives">
+      <UniqueIdentifier>{4274818c-84f3-4d9c-971c-b3ef658e6309}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Keyboard.cpp">
@@ -100,6 +106,15 @@
       <Filter>Source Files\Drawables</Filter>
     </ClCompile>
     <ClCompile Include="Box.cpp">
+      <Filter>Source Files\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="FPSdebugger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Melon.cpp">
+      <Filter>Source Files\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Pyramid.cpp">
       <Filter>Source Files\Drawables</Filter>
     </ClCompile>
   </ItemGroup>
@@ -185,6 +200,42 @@
     <ClInclude Include="Box.h">
       <Filter>Header Files\Drawables</Filter>
     </ClInclude>
+    <ClInclude Include="DrawableBase.h">
+      <Filter>Header Files\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSdebugger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Plane.h">
+      <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Prism.h">
+      <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="Cone.h">
+      <Filter>Header Files\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="PolygonList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MathModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pyramid.h">
+      <Filter>Header Files\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Melon.h">
+      <Filter>Header Files\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="l1.rc">
@@ -225,28 +276,16 @@
     </Media>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\VertexShader.hlsl">
+    <FxCompile Include="ColorIndexVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\PixelShader.hlsl">
+    <FxCompile Include="ColorIndexPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShaderColor.hlsl">
+    <FxCompile Include="ColorBlendVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="VertexShaderColor.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShaderColorMatrix.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShaderColorMatrix3d.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="VertexShaderColorBufferMatrix3d.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShaderColorBuffer.hlsl">
+    <FxCompile Include="ColorBlendPS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

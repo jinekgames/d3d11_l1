@@ -52,10 +52,3 @@
 #define STRICT
 
 #include <Windows.h>
-
-
-#ifdef NDEBUG
-#define IS_DEBUG false
-#else
-#define IS_DEBUG true
-#endif // NDEBUG

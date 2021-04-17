@@ -20,6 +20,8 @@
 
 #include "App.h"
 
+#include <sstream>
+
 
 
 int CALLBACK WinMain(
@@ -30,8 +32,32 @@ int CALLBACK WinMain(
 
 	srand(GetTickCount64());
 
+
+
+	// Applying window settigs
+	wndsets WndSets;
+	WndSets.adapter = 0;
+	WndSets.hardness = 100;
+	WndSets.wndWidth = 800;
+	WndSets.wndHeigth = 600;
+	WndSets.screenScale.Numerator = 4;
+	WndSets.screenScale.Denominator = 3;
+	WndSets.wndName = L"sosi";
+
+	std::stringstream cmdLine(lpCmdLine);
+	if (cmdLine.str().length()) {
+		cmdLine >> WndSets.adapter >> WndSets.hardness 
+			>> WndSets.wndWidth >> WndSets.wndHeigth >> 
+			WndSets.screenScale.Numerator >> WndSets.screenScale.Denominator;
+	}
+
+
+
+	App AppClass(WndSets);
+
+
 	try {
-		return App{}.Go();
+		return AppClass.Go();
 	}
 	catch( const myException& e ) {
 		MessageBoxA( nullptr,e.what(),e.GetType(),MB_OK | MB_ICONEXCLAMATION );

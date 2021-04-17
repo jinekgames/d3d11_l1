@@ -52,9 +52,9 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept {
 
 
 // Window Stuff
-Window::Window(int width, int height, LPCWSTR name) 
+Window::Window(wndsets& WndSets) 
 	:
-	width(width), height(height) {
+	width(WndSets.wndWidth), height(WndSets.wndHeigth) {
 
 
 	// calculate window size based on desired client region size
@@ -69,7 +69,7 @@ Window::Window(int width, int height, LPCWSTR name)
 
 	// create window & get hwnd
 	hwnd = CreateWindow(
-		WindowClass::GetName(), name,
+		WindowClass::GetName(), WndSets.wndName,
 		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT, wr.right - wr.left, wr.bottom - wr.top,
 		nullptr, nullptr, WindowClass::GetInstance(), this
@@ -84,7 +84,7 @@ Window::Window(int width, int height, LPCWSTR name)
 	// show window
 	ShowWindow(hwnd, SW_SHOWDEFAULT);
 	// create graphics object
-	pGraph = std::make_unique<Graphics>(hwnd);
+	pGraph = std::make_unique<Graphics>(hwnd, WndSets);
 }
 
 Window::~Window() {

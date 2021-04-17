@@ -12,18 +12,21 @@
 #include <DirectXMath.h>
 #include "GraphicsThrowMacros.h"
 
+// for EnumAdapters
+#include <dxgi.h>
+#pragma comment(lib, "DXGI.lib")
+
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib,"D3DCompiler.lib")
 
-#include "WindowSettings.h"
 
 namespace dx = DirectX;
 namespace wrl = Microsoft::WRL;
 
 
 
-Graphics::Graphics(HWND hwnd) {
+Graphics::Graphics(HWND hwnd, wndsets& WndSets) {
 
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferDesc.Width = 0;
@@ -50,9 +53,34 @@ Graphics::Graphics(HWND hwnd) {
 	// for checking results of d3d functions
 	HRESULT hr;
 
+
+	// getting adapter ptr
+	wrl::ComPtr<IDXGIFactory> pFactory;
+	hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&pFactory));
+
+#ifdef VIDEO_ADAPTER
+	IDXGIAdapter* pAdapter = nullptr;
+	pFactory->EnumAdapters(WndSets.adapter, &pAdapter);
+
 	// create device and buffers and swap chain and rendering context
 	GFX_THROW_INFO(D3D11CreateDeviceAndSwapChain(
+		pAdapter,					//adapter
+		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
+		swapCreateFlags,
+		nullptr,
+		0,
+		D3D11_SDK_VERSION,
+		&sd,
+		&pSwap,
+		&pDevice,
+		nullptr,
+		&pContext
+	));
+#else // !VIDEO_ADAPTER
+	// create device and buffers and swap chain and rendering context
+	GFX_THROW_INFO(D3D11CreateDeviceAndSwapChain(
+		nullptr,					//adapter
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
 		swapCreateFlags,
@@ -65,12 +93,12 @@ Graphics::Graphics(HWND hwnd) {
 		nullptr,
 		&pContext
 	));
+#endif // VIDEO_ADAPTER
 
-	// gain access to texture subresource in swapchain (back buffer)
-	Microsoft::WRL::ComPtr<ID3D11Resource> pBackBuffer;
+	// gain access to texture subresource in swap chain (back buffer)
+	wrl::ComPtr<ID3D11Resource> pBackBuffer;
 	GFX_THROW_INFO(pSwap->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer));
 	GFX_THROW_INFO(pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget));
-
 
 	// create depth stensil state
 	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
@@ -86,8 +114,8 @@ Graphics::Graphics(HWND hwnd) {
 	// create depth stensil texture
 	wrl::ComPtr<ID3D11Texture2D> pDepthStencil;
 	D3D11_TEXTURE2D_DESC descDepth = {};
-	descDepth.Width = 800u;
-	descDepth.Height = 600u;
+	descDepth.Width = WndSets.wndWidth;
+	descDepth.Height = WndSets.wndHeigth;
 	descDepth.MipLevels = 1u;
 	descDepth.ArraySize = 1u;
 	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
@@ -111,14 +139,13 @@ Graphics::Graphics(HWND hwnd) {
 
 	// configure viewport
 	D3D11_VIEWPORT vp;
-	vp.Width = WND_WIDTH;
-	vp.Height = WND_HEIGTH;
+	vp.Width = WndSets.wndWidth;
+	vp.Height = WndSets.wndHeigth;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0.0f;
 	vp.TopLeftY = 0.0f;
 	pContext->RSSetViewports(1u, &vp);
-
 }
 
 void Graphics::SwapBuffers() {
@@ -140,9 +167,9 @@ void Graphics::SwapBuffers() {
 
 }
 
-void Graphics::ClearBackBuffer(float red, float green, float blue) {
+void Graphics::ClearBackBuffer(float red, float green, float blue) noexcept {
 
-	const float color[] = { red, green, blue, 1.0f };
+	const float color[] = { red,green,blue,1.0f };
 	pContext->ClearRenderTargetView(pTarget.Get(), color);
 	pContext->ClearDepthStencilView(pDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 
@@ -154,355 +181,6 @@ void Graphics::DrawIndexed(UINT count) noexcept(!IS_DEBUG) {
 	GFX_THROW_INFO_ONLY(pContext->DrawIndexed(count, 0u, 0u));
 
 }
-
-// jnk_gms code
-void Graphics::DrawTriangleU(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology) {
-
-	if (isShaderLoded) {
-
-		namespace wrl = Microsoft::WRL;
-		HRESULT hr;
-
-		wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
-		D3D11_BUFFER_DESC bd = {};
-		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.CPUAccessFlags = 0u;
-		bd.MiscFlags = 0u;
-		bd.ByteWidth = sizeofVertices;
-		bd.StructureByteStride = sizeof(Vertex);
-		D3D11_SUBRESOURCE_DATA sd = {};
-		sd.pSysMem = vertices;
-		GFX_THROW_INFO(pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
-
-		// Bind vertex buffer to pipeline
-		const UINT stride = sizeof(Vertex);
-		const UINT offset = 0u;
-		pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-
-		// Set primitive topology
-		pContext->IASetPrimitiveTopology(primitiveTopology);
-
-
-		GFX_THROW_INFO_ONLY(pContext->Draw(vertexCount, 0u));
-
-	} else {
-
-		OutputDebugStringA("=============================\nSHADERS WERENT SETUP\nGraphics class\n=============================\n");
-		myException e(__LINE__, __FILE__);
-		throw e;
-
-	}
-
-}
-void Graphics::DrawTriangleUColor(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology) {
-
-	if (isShaderLoded) {
-
-		namespace wrl = Microsoft::WRL;
-		HRESULT hr;
-
-		wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
-		D3D11_BUFFER_DESC bd = {};
-		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.CPUAccessFlags = 0u;
-		bd.MiscFlags = 0u;
-		bd.ByteWidth = sizeofVertices;
-		bd.StructureByteStride = sizeof(VertexColor);
-		D3D11_SUBRESOURCE_DATA sd = {};
-		sd.pSysMem = vertices;
-		GFX_THROW_INFO(pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
-
-		// Bind vertex buffer to pipeline
-		const UINT stride = sizeof(VertexColor);
-		const UINT offset = 0u;
-		pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-
-		// Set primitive topology
-		pContext->IASetPrimitiveTopology(primitiveTopology);
-
-
-		GFX_THROW_INFO_ONLY(pContext->Draw(vertexCount, 0u));
-
-	}
-	else {
-
-		OutputDebugStringA("=============================\nSHADERS WERENT SETUP\nGraphics class\n=============================\n");
-		myException e(__LINE__, __FILE__);
-		throw e;
-
-	}
-
-}
-void Graphics::ConfigureTargetAndViewport()
-{
-	// bind render target
-	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), nullptr);
-
-
-	// configure viewport
-	D3D11_VIEWPORT vp;
-	vp.Width = WND_WIDTH;
-	vp.Height = WND_HEIGTH;
-	vp.MinDepth = 0;
-	vp.MaxDepth = 1;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	pContext->RSSetViewports(1u, &vp);
-
-}
-void Graphics::DrawTriangle(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology, LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath) {
-
-	namespace wrl = Microsoft::WRL;
-	HRESULT hr;
-
-	wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
-	D3D11_BUFFER_DESC bd = {};
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.CPUAccessFlags = 0u;
-	bd.MiscFlags = 0u;
-	bd.ByteWidth = sizeofVertices;
-	bd.StructureByteStride = sizeof(Vertex);
-	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = vertices;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
-
-	// Bind vertex buffer to pipeline
-	const UINT stride = sizeof(Vertex);
-	const UINT offset = 0u;
-	pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-
-	// create pixel shader
-	wrl::ComPtr<ID3D11PixelShader> pPixelShader;
-	wrl::ComPtr<ID3DBlob> pBlob;
-	GFX_THROW_INFO(D3DReadFileToBlob(pixelShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
-
-	// bind pixel shader
-	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-
-	// create vertex shader
-	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
-	GFX_THROW_INFO(D3DReadFileToBlob(vertexShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
-
-	// bind vertex shader
-	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-
-	// input (vertex) layout (2d position only)
-	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
-	const D3D11_INPUT_ELEMENT_DESC ied[] = {
-		{ "Position",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-	};
-	GFX_THROW_INFO(pDevice->CreateInputLayout(
-		ied, (UINT)std::size(ied),
-		pBlob->GetBufferPointer(),
-		pBlob->GetBufferSize(),
-		&pInputLayout
-	));
-
-	// bind vertex layout
-	pContext->IASetInputLayout(pInputLayout.Get());
-
-
-	// bind render target
-	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), nullptr);
-
-
-	// Set primitive topology
-	pContext->IASetPrimitiveTopology(primitiveTopology);
-
-
-	// configure viewport
-	D3D11_VIEWPORT vp;
-	vp.Width = 800;
-	vp.Height = 600;
-	vp.MinDepth = 0;
-	vp.MaxDepth = 1;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	pContext->RSSetViewports(1u, &vp);
-
-
-	GFX_THROW_INFO_ONLY(pContext->Draw(vertexCount, 0u));
-
-}
-bool Graphics::IsShaderLoded() {
-	return isShaderLoded;
-}
-void Graphics::SetShaders(LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath) {
-
-	namespace wrl = Microsoft::WRL;
-	HRESULT hr;
-
-	// create pixel shader
-	wrl::ComPtr<ID3D11PixelShader> pPixelShader;
-	wrl::ComPtr<ID3DBlob> pBlob;
-	GFX_THROW_INFO(D3DReadFileToBlob(pixelShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
-
-	// bind pixel shader
-	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-
-	// create vertex shader
-	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
-	GFX_THROW_INFO(D3DReadFileToBlob(vertexShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
-
-	// bind vertex shader
-	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-	// input (vertex) layout (2d position only)
-	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
-	const D3D11_INPUT_ELEMENT_DESC ied[] = {
-		{ "Position",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-	};
-	GFX_THROW_INFO(pDevice->CreateInputLayout(
-		ied, (UINT)std::size(ied),
-		pBlob->GetBufferPointer(),
-		pBlob->GetBufferSize(),
-		&pInputLayout
-	));
-
-	// bind vertex layout
-	pContext->IASetInputLayout(pInputLayout.Get());
-
-	isShaderLoded = true;
-
-}
-void Graphics::SetShadersColor(LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath) {
-
-	namespace wrl = Microsoft::WRL;
-	HRESULT hr;
-
-	// create pixel shader
-	wrl::ComPtr<ID3D11PixelShader> pPixelShader;
-	wrl::ComPtr<ID3DBlob> pBlob;
-	GFX_THROW_INFO(D3DReadFileToBlob(pixelShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
-
-	// bind pixel shader
-	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-
-	// create vertex shader
-	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
-	GFX_THROW_INFO(D3DReadFileToBlob(vertexShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
-
-	// bind vertex shader
-	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-	// input (vertex) layout (2d position only)
-	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
-	const D3D11_INPUT_ELEMENT_DESC ied[] = {
-		{ "Position",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "Color",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,8u,D3D11_INPUT_PER_VERTEX_DATA,0 },
-	};
-	GFX_THROW_INFO(pDevice->CreateInputLayout(
-		ied, (UINT)std::size(ied),
-		pBlob->GetBufferPointer(),
-		pBlob->GetBufferSize(),
-		&pInputLayout
-	));
-
-	// bind vertex layout
-	pContext->IASetInputLayout(pInputLayout.Get());
-
-	isShaderLoded = true;
-
-}
-void Graphics::DrawTriangleColor(const void* vertices, UINT vertexCount, UINT sizeofVertices, D3D_PRIMITIVE_TOPOLOGY primitiveTopology, LPCWSTR pixelShaderPath, LPCWSTR vertexShaderPath) {
-
-	namespace wrl = Microsoft::WRL;
-	HRESULT hr;
-
-	wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
-	D3D11_BUFFER_DESC bd = {};
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.CPUAccessFlags = 0u;
-	bd.MiscFlags = 0u;
-	bd.ByteWidth = sizeofVertices;
-	bd.StructureByteStride = sizeof(VertexColor);
-	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = vertices;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
-	// Bind vertex buffer to pipeline
-	const UINT stride = sizeof(VertexColor);
-	const UINT offset = 0u;
-	pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-
-	// create pixel shader
-	wrl::ComPtr<ID3D11PixelShader> pPixelShader;
-	wrl::ComPtr<ID3DBlob> pBlob;
-	GFX_THROW_INFO(D3DReadFileToBlob(pixelShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
-
-	// bind pixel shader
-	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-
-	// create vertex shader
-	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
-	GFX_THROW_INFO(D3DReadFileToBlob(vertexShaderPath, &pBlob));
-	GFX_THROW_INFO(pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
-
-	// bind vertex shader
-	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-
-	// input (vertex) layout (2d position only)
-	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
-	const D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{ "Position",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "Color",0,DXGI_FORMAT_R8G8B8A8_UNORM,0,8u,D3D11_INPUT_PER_VERTEX_DATA,0 },
-	};
-	GFX_THROW_INFO(pDevice->CreateInputLayout(
-		ied, (UINT)std::size(ied),
-		pBlob->GetBufferPointer(),
-		pBlob->GetBufferSize(),
-		&pInputLayout
-	));
-
-	// bind vertex layout
-	pContext->IASetInputLayout(pInputLayout.Get());
-
-
-	// bind render target
-	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), nullptr);
-
-
-	// Set primitive topology
-	pContext->IASetPrimitiveTopology(primitiveTopology);
-
-
-	// configure viewport
-	D3D11_VIEWPORT vp;
-	vp.Width = 800;
-	vp.Height = 600;
-	vp.MinDepth = 0;
-	vp.MaxDepth = 1;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	pContext->RSSetViewports(1u, &vp);
-
-
-	GFX_THROW_INFO_ONLY(pContext->Draw(vertexCount, 0u));
-
-}
-void Graphics::ReleaseShaders() {}
-// --
 
 void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept {
 	projection = proj;

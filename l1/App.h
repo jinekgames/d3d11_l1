@@ -9,13 +9,15 @@
 
 #include "Window.h"
 #include "FpsTimer.h"
+#include "FPSdebugger.h"
+
 
 
 
 class App {
 
 public:
-	App();
+	App(wndsets& wndSets);
 	// master frame / message loop
 	int Go();
 	~App();
@@ -26,6 +28,8 @@ private:
 private:
 	Window wnd;
 	FpsTimer timer;
-	std::vector<std::unique_ptr<class Box>> boxes;
+	FPSdebugger fpsLog;
+	std::vector<std::unique_ptr<class Drawable>> drawables;
+	UINT nDrawables;
 
 };
